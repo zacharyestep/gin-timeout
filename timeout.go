@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/vearne/gin-timeout/buffpool"
+	"github.com/zacharyestep/gin-timeout/buffpool"
 )
 
 var defaultOptions TimeoutOptions
