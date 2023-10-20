@@ -1,4 +1,4 @@
-module github.com/vearne/gin-timeout
+module github.com/zacharyestep/gin-timeout
 
 go 1.19
 
