@@ -27,7 +27,6 @@ func AccessLog() gin.HandlerFunc {
 }
 
 func main() {
-
 	// create new gin without any middleware
 	engine := gin.Default()
 
@@ -35,8 +34,8 @@ func main() {
 	// add timeout middleware with 2 second duration
 	engine.Use(timeout.Timeout(
 		timeout.WithTimeout(2*time.Second),
-		timeout.WithErrorHttpCode(http.StatusRequestTimeout), // optional
-		timeout.WithDefaultMsg(defaultMsg),                   // optional
+		timeout.WithTimeoutHttpCode(http.StatusRequestTimeout), // optional
+		timeout.WithDefaultMsg(defaultMsg),                     // optional
 		timeout.WithCallBack(func(r *http.Request) {
 			fmt.Println("timeout happen, url:", r.URL.String())
 		}), // optional

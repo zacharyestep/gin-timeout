@@ -3,6 +3,7 @@ package timeout
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"runtime/debug"
@@ -12,16 +13,15 @@ import (
 	"github.com/vearne/gin-timeout/buffpool"
 )
 
-var (
-	defaultOptions TimeoutOptions
-)
+var defaultOptions TimeoutOptions
 
 func init() {
 	defaultOptions = TimeoutOptions{
-		CallBack:      nil,
-		DefaultMsg:    `{"code": -1, "msg":"http: Handler timeout"}`,
-		Timeout:       3 * time.Second,
-		ErrorHttpCode: http.StatusServiceUnavailable,
+		CallBack:        nil,
+		DefaultMsg:      nil,
+		Timeout:         3 * time.Second,
+		TimeoutHttpCode: http.StatusServiceUnavailable,
+		DefaultHttpCode: http.StatusOK,
 	}
 }
 
@@ -35,8 +35,10 @@ func Timeout(opts ...Option) gin.HandlerFunc {
 
 		// sync.Pool
 		buffer := buffpool.GetBuff()
-		tw := &TimeoutWriter{body: buffer, ResponseWriter: cp.Writer,
-			h: make(http.Header)}
+		tw := &TimeoutWriter{
+			body: buffer, ResponseWriter: cp.Writer,
+			h: make(http.Header),
+		}
 		tw.TimeoutOptions = defaultOptions
 
 		// Loop through each option
@@ -79,14 +81,24 @@ func Timeout(opts ...Option) gin.HandlerFunc {
 			tw.mu.Lock()
 			defer tw.mu.Unlock()
 
-			tw.timedOut = true
-			tw.ResponseWriter.WriteHeader(tw.ErrorHttpCode)
+			c.Error(fmt.Errorf("the timeout middleware saw error: %w", ctx.Err()))
 
-			n, err = tw.ResponseWriter.Write(encodeBytes(tw.DefaultMsg))
-			if err != nil {
-				panic(err)
+			// Did it timeout?
+			if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+				tw.timedOut = true
+				tw.ResponseWriter.WriteHeader(tw.TimeoutHttpCode)
+			} else {
+				tw.ResponseWriter.WriteHeader(tw.DefaultHttpCode)
 			}
-			tw.size += n
+
+			if tw.DefaultMsg != nil {
+				n, err = tw.ResponseWriter.Write(encodeBytes(tw.DefaultMsg))
+				if err != nil {
+					panic(err)
+				}
+				tw.size += n
+			}
+
 			cp.Abort()
 
 			// execute callback func
@@ -115,7 +127,6 @@ func Timeout(opts ...Option) gin.HandlerFunc {
 			}
 			buffpool.PutBuff(buffer)
 		}
-
 	}
 }
 

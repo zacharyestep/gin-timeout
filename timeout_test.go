@@ -44,8 +44,8 @@ func testEngine() *gin.Engine {
 	// add timeout middleware with 2 second duration
 	engine.Use(Timeout(
 		WithTimeout(2*time.Second),
-		WithErrorHttpCode(http.StatusRequestTimeout), // optional
-		WithDefaultMsg(defaultMsg),                   // optional
+		WithTimeoutHttpCode(http.StatusRequestTimeout), // optional
+		WithDefaultMsg(defaultMsg),                     // optional
 		WithCallBack(func(r *http.Request) {
 			fmt.Println("timeout happen, url:", r.URL.String())
 		}), // optional
@@ -177,5 +177,4 @@ func TestWriteSize(t *testing.T) {
 	result := w.Result()
 
 	assert.Equal(t, http.StatusOK, result.StatusCode)
-
 }

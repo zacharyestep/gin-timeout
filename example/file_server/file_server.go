@@ -13,7 +13,7 @@ func main() {
 	defaultMsg := `{"code": -1, "msg":"http: Handler timeout"}`
 	router.Use(timeout.Timeout(timeout.WithTimeout(10*time.Second),
 		timeout.WithDefaultMsg(defaultMsg)))
-	//router.StaticFS("/static", gin.Dir("/tmp/static", true))
+	// router.StaticFS("/static", gin.Dir("/tmp/static", true))
 	router.Static("/static", "/tmp/static")
 	log.Fatal(router.Run(":8080"))
 }

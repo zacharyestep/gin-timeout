@@ -2,9 +2,10 @@ package timeout
 
 import (
 	"bytes"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"sync"
+
+	"github.com/gin-gonic/gin"
 )
 
 type TimeoutWriter struct {

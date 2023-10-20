@@ -5,14 +5,17 @@ import (
 	"time"
 )
 
-type CallBackFunc func(*http.Request)
-type Option func(*TimeoutWriter)
+type (
+	CallBackFunc func(*http.Request)
+	Option       func(*TimeoutWriter)
+)
 
 type TimeoutOptions struct {
-	CallBack      CallBackFunc
-	DefaultMsg    interface{}
-	Timeout       time.Duration
-	ErrorHttpCode int
+	CallBack        CallBackFunc
+	DefaultMsg      interface{}
+	Timeout         time.Duration
+	TimeoutHttpCode int
+	DefaultHttpCode int
 }
 
 func WithTimeout(d time.Duration) Option {
@@ -22,9 +25,16 @@ func WithTimeout(d time.Duration) Option {
 }
 
 // Optional parameters
-func WithErrorHttpCode(code int) Option {
+func WithTimeoutHttpCode(code int) Option {
 	return func(t *TimeoutWriter) {
-		t.ErrorHttpCode = code
+		t.TimeoutHttpCode = code
+	}
+}
+
+// Optional parameters
+func WithNonTimeoutHttpCode(code int) Option {
+	return func(t *TimeoutWriter) {
+		t.TimeoutHttpCode = code
 	}
 }
 
